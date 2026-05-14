@@ -1,4 +1,9 @@
-
-Apr 25 10:15:32 Failed password from 192.168.1.10
+Apr 25 10:15:32 Login failed for user admin
 Apr 25 10:16:01 Accepted password from 10.0.0.2
-Apr 25 10:17:45 Failed password from 192.168.1.10
+Apr 25 10:16:32 Failed login from 10.0.0.1  
+Apr 25 10:16:32 Failed login from 10.0.0.1  
+Apr 25 10:16:32 Failed login from 10.0.0.1  
+Apr 25 10:16:32 ERROR: invalid password
+Apr 25 10:16:32 Connection successful
+Apr 25 10:16:32 Failed login from 10.0.0.1
+Apr 25 10:16:32 Failed login from 10.0.0.1

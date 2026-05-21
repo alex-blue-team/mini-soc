@@ -1,79 +1,92 @@
-# mini-soc
+# Mini SIEM System (Python)
 
-Simple educational Mini-SOC project for log analysis and brute-force detection.
+A simple educational mini-SIEM project written in Python.
 
-## Description
+The project analyzes log files, detects failed login attempts from the same IP address, and generates alerts based on suspicious activity.
 
-This project simulates a basic SOC (Security Operations Center) pipeline.
+---
 
-It reads log files line by line, analyzes authentication events, extracts IP addresses, and detects possible brute-force attacks based on repeated failed login attempts.
+## Current Features
 
-The project is modular and split into separate components for parsing, correlation, and alert generation.
+✔ Log parsing  
+✔ Regex-based IP extraction  
+✔ Failed login detection  
+✔ Event correlation by source IP  
+✔ Threat severity classification  
+✔ JSON formatted alerts  
+✔ Streaming alert mode  
 
-## Features
-
-- Stream-based log reading using generators
-- Failed login detection
-- IP address extraction from logs
-- Simple event correlation
-- Brute-force attack detection
-- Real-time alert output
-- Modular architecture
-
-## Project Structure
-
-- parser.py — reads log files line by line
-- correlator.py — analyzes events and detects suspicious activity
-- alert.py — generates alert messages
-- main.py — main pipeline controller
-- detector.py — older keyword-based detector version
-- test.log — sample log file
+---
 
 ## How It Works
 
-log file → parser → correlator → alert
+The system reads log files line by line and searches for failed login attempts.
 
-1. The parser reads the log file line by line
-2. The correlator analyzes authentication events
-3. IP addresses are extracted from suspicious logs
-4. Failed login attempts are counted per IP
-5. Alerts are generated when suspicious thresholds are reached
+If multiple failed logins are detected from the same IP address, the system increases the internal event counter and classifies the threat severity level.
 
-## Detection Logic
+Current severity thresholds:
 
-The system currently detects:
+- 5 failed logins → Low
+- 20 failed logins → Medium
+- 100 failed logins → Critical
 
-- Multiple failed login attempts from the same IP
-- Possible brute-force attacks after 5 failed attempts
+Alerts are displayed in JSON format for better readability and future SIEM-style processing.
 
-Example:
+---
 
-```text
-[ALERT]: Possible brute-force attack from 10.0.0.1 (failed login: 5)
-```
+## Example Alert
 
-## Usage
 
-Run the project:
+{
+    "event": "brute-force",
+    "source": "192.168.1.15",
+    "failed login": 20,
+    "severity": "Medium"
+}
 
-```bash
-python3 main.py
-```
 
-## Future Improvements
+## Test Scenarios
 
-- Add timestamp parsing
-- Save alerts to a separate file
-- Detect multiple attack types
-- Add configuration support
-- Add real-time log monitoring
-- Improve log parsing accuracy
-- Add alert severity levels
+The project currently includes multiple test log samples:
 
-## About Me
+test_01.log → Low severity
+test_02.log → Medium severity
+test_03.log → Critical severity
 
-I am a beginner cybersecurity specialist focusing on SOC analysis and log investigation.
+Log sample switching is currently performed manually inside main.py.
 
-This project is part of my hands-on learning journey, where I build small security tools from scratch to better understand how log parsing, event correlation, and alerting work in real environments.
 
-My goal is to become a Junior SOC Analyst and continue developing practical cybersecurity skills through real projects and continuous learning.
+## Screenshots
+
+Version 3
+
+Located in:
+
+screenshots/01/
+
+Version 4
+
+Located in:
+
+screenshots/02/
+
+
+## Technologies Used
+
+Python
+Regex (re)
+JSON
+Log parsing
+Event correlation
+Future Plans
+
+
+## Next planned update
+
+✔ V5 = Final Summary Mode
+
+Streaming alerts will remain available as a separate operational mode.
+
+
+
+

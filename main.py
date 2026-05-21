@@ -1,26 +1,25 @@
-# Main entry point of the mini SIEM system.
-# Reads logs, analyzes events, and creates alerts.
-
+import json
 from parser import read_log
-from correlator import count_events
 from alert import create_alert
+from correlator import count_events
 
 
 def main():
-    # Path to the log file
-    file_path = "test.log"
+
+    # Switch log samples manually
+    #file_path = "test_01.log"
+    #file_path = "test_02.log"
+    file_path = "test_03.log"
 
     # Read log file line by line
     for line in read_log(file_path):
 
-        # Analyze events in logs
         result = count_events(line)
 
-        # Create alert if suspicious activity detected
+        # Print alert if threat detected
         if result:
-            create_alert(result)
+            create_alert(json.dumps(result, indent=4))
 
 
-# Run program directly from terminal
 if __name__ == "__main__":
     main()

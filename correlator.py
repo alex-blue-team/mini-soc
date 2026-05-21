@@ -1,8 +1,6 @@
-# Correlation module for detecting suspicious login activity.
-
 import re
 
-# Stores failed login attempts by IP address
+# Stores failed login attempts by IP
 failed_logins = {}
 
 
@@ -11,30 +9,44 @@ def count_events(line):
     # Detect failed login attempts
     if "failed login" in line.lower():
 
-        # Extract IP address from log line
         ip = extract_ip(line)
 
-        # Ignore logs without valid IP
         if ip == "unknown":
             return None
 
-        # Create counter for new IP
+        # Count attempts for each IP
         if ip not in failed_logins:
             failed_logins[ip] = 0
 
-        # Increase failed login counter
         failed_logins[ip] += 1
 
-        # Detect possible brute-force attack
-        if failed_logins[ip] >= 5:
-            return f"Possible brute-force attack from {ip} (failed login: {failed_logins[ip]})"
+        severity = None
+
+        # Define threat severity levels
+        if failed_logins[ip] == 5:
+            severity = "Low"
+
+        elif failed_logins[ip] == 20:
+            severity = "Medium"
+
+        elif failed_logins[ip] == 100:
+            severity = "Critical"
+
+        # Return alert data as JSON-ready dictionary
+        if severity:
+            return {
+                "event": "brute-force",
+                "source": ip,
+                "failed login": failed_logins[ip],
+                "severity": severity,
+            }
 
     return None
 
 
 def extract_ip(line):
 
-    # Search for IPv4 address in log line
+    # Extract IPv4 address from log line
     match = re.search(r"\d+\.\d+\.\d+\.\d+", line)
 
     if match:

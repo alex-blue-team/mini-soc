@@ -1,92 +1,124 @@
-# Mini SIEM System (Python)
+# Mini-SIEM Project
 
-A simple educational mini-SIEM project written in Python.
+A simple Python-based mini-SIEM project for detecting suspicious login activity in Linux log files.
 
-The project analyzes log files, detects failed login attempts from the same IP address, and generates alerts based on suspicious activity.
+The project analyzes authentication logs, searches for repeated failed login attempts, correlates events by IP address, and generates alerts in JSON format.
+
+---
+
+## Features
+
+- Detects repeated failed login attempts
+- Correlates events by IP address
+- Generates alerts in JSON format
+- User selects log file manually from terminal
+- Handles incorrect command usage
+- Handles missing/nonexistent files
+- Processes multiple test log files
+- Supports detection from multiple attacking IP addresses
 
 ---
 
-## Current Features
+## Project Structure
 
-✔ Log parsing  
-✔ Regex-based IP extraction  
-✔ Failed login detection  
-✔ Event correlation by source IP  
-✔ Threat severity classification  
-✔ JSON formatted alerts  
-✔ Streaming alert mode  
-
----
+```text
+mini_siem/
+│
+├── main.py
+├── parser.py
+├── correlator.py
+├── alert.py
+│
+├── logs/
+│   ├── test_01.log
+│   ├── test_02.log
+│   ├── test_03.log
+│   └── test_04.log
+│
+└── README.md```
 
 ## How It Works
 
-The system reads log files line by line and searches for failed login attempts.
-
-If multiple failed logins are detected from the same IP address, the system increases the internal event counter and classifies the threat severity level.
-
-Current severity thresholds:
-
-- 5 failed logins → Low
-- 20 failed logins → Medium
-- 100 failed logins → Critical
-
-Alerts are displayed in JSON format for better readability and future SIEM-style processing.
+1. User starts the program from terminal
+2. User provides path to a log file
+3. Program reads logs line by line
+4. Failed login attempts are extracted
+5. Events are correlated by IP address
+6. Alert is generated when threshold is reached
 
 ---
 
-## Example Alert
+## Example Usage
+
+Run the program:
+
+```bash
+python3 main.py logs/test_01.log
+```
+
+If file path is missing:
+
+```bash
+Usage: python3 main.py path_file_log
+```
+
+If file does not exist:
+
+```bash
+File not found
+```
 
 
+### Example Alert
 {
-    "event": "brute-force",
-    "source": "192.168.1.15",
-    "failed login": 20,
-    "severity": "Medium"
+    "alert": "Possible brute-force attack detected",
+    "ip_address": "192.168.1.10",
+    "failed_attempts": 5
 }
 
+## Test Logs
 
-## Test Scenarios
+The project includes several test log files:
 
-The project currently includes multiple test log samples:
+test_01.log — small number of failed logins
+test_02.log — larger number of failed logins
+test_03.log — heavy brute-force simulation
+test_04.log — brute-force activity from two different IP addresses
 
-test_01.log → Low severity
-test_02.log → Medium severity
-test_03.log → Critical severity
+### Example:
 
-Log sample switching is currently performed manually inside main.py.
+one IP performs 5 failed attempts
+second IP performs 20 failed attempts
 
+##Technologies Used
 
-## Screenshots
-
-Version 3
-
-Located in:
-
-screenshots/01/
-
-Version 4
-
-Located in:
-
-screenshots/02/
-
-
-## Technologies Used
-
-Python
-Regex (re)
+Python 3
 JSON
-Log parsing
+Linux terminal
+Log analysis
 Event correlation
-Future Plans
+Video Demonstration
 
+## This short demo shows:
 
-## Next planned update
+processing different log sizes
+brute-force detection
+JSON alert generation
+incorrect command handling
+nonexistent file handling
+multi-IP brute-force detection
 
-✔ V5 = Final Summary Mode
+## Direct link:
 
-Streaming alerts will remain available as a separate operational mode.
+https://youtu.be/gYIt7p-wplQ?si=WpMjJW5Rwh6TYRgX
 
+## Future Improvements
+Real-time log monitoring
+Detection rules configuration
+Email or Telegram alerts
+Support for additional log formats
+Simple dashboard/web interface
 
+#Author
 
-
+Cybersecurity student building practical blue-team and detection engineering skills through hands-on projects.

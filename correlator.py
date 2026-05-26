@@ -4,7 +4,7 @@ import re
 failed_logins = {}
 
 
-def count_events(line):
+def process_events(line):
 
     # Detect failed login attempts
     if "failed login" in line.lower():

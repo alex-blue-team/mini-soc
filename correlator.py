@@ -1,55 +1,40 @@
+# Correlation engine.
+# Detects failed login events and aggregates them by source IP address.
+
 import re
 
-# Stores failed login attempts by IP
+
 failed_logins = {}
 
+def process_events(lines):
 
-def process_events(line):
+	# Process log entries and count failed logins per IP address.
+	for line in lines:
 
-    # Detect failed login attempts
-    if "failed login" in line.lower():
+		if "failed login" in line.lower():
+		
+			ip = extract_ip(line)
 
-        ip = extract_ip(line)
+			# Skip events where no valid IP address was found.
+			if ip == "unknown":
+				continue
 
-        if ip == "unknown":
-            return None
+			# Create a counter for a new IP address.
+			if ip not in failed_logins:
+				failed_logins[ip] = 0
 
-        # Count attempts for each IP
-        if ip not in failed_logins:
-            failed_logins[ip] = 0
+			# Increment the failed login counter.
+			failed_logins[ip] += 1
 
-        failed_logins[ip] += 1
-
-        severity = None
-
-        # Define threat severity levels
-        if failed_logins[ip] == 5:
-            severity = "Low"
-
-        elif failed_logins[ip] == 20:
-            severity = "Medium"
-
-        elif failed_logins[ip] == 100:
-            severity = "Critical"
-
-        # Return alert data as JSON-ready dictionary
-        if severity:
-            return {
-                "event": "brute-force",
-                "source": ip,
-                "failed login": failed_logins[ip],
-                "severity": severity,
-            }
-
-    return None
+	return failed_logins
 
 
 def extract_ip(line):
 
-    # Extract IPv4 address from log line
-    match = re.search(r"\d+\.\d+\.\d+\.\d+", line)
+	# Extract an IPv4 address from a log entry.
+	match = re.search(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", line)
 
-    if match:
-        return match.group()
+	if match:
+		return match.group()
 
-    return "unknown"
+	return "unknown"

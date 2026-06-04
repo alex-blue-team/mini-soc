@@ -1,33 +1,42 @@
-# Reporting module.
-# Generates structured security findings and assigns severity levels.
+# reporter.py responsible for:
+# - Processing aggregated correlation results
+# - Assigning final severity levels
+# - Building structured summary reports for analysis output
 
-def create_summary(failed_logins):
 
-	results = []
+def create_summary(summary_failed_logins):
+    """
+    Final summary report generator.
 
-	# Build a security finding for each source IP.
-	for ip in failed_logins:
+    Converts aggregated failed login statistics into
+    structured security events with severity classification.
+    """
 
-		counted_failures = failed_logins[ip]
+    results = []
 
-		# Determine the severity based on the number of failed logins.
-		if counted_failures >= 100:
-			severity = "Critical"
+    for ip in summary_failed_logins:
 
-		elif counted_failures >= 20:
-			severity = "High"
+        count_failures = summary_failed_logins[ip]
 
-		elif counted_failures >= 5:
-			severity = "Medium"
+        # Final severity classification based on total failed attempts
+        if count_failures >= 100:
+            severity = "Critical"
 
-		else:
-			severity = "Low"
+        elif count_failures >= 20:
+            severity = "High"
 
-		# Create a structured report entry.
-		results.append({
-				"event": "brute-force",
-				"source": ip,
-				"failed logins": failed_logins[ip],
-				"severity": severity})
+        elif count_failures >= 5:
+            severity = "Medium"
 
-	return results
+        else:
+            severity = "Low"
+
+        # Build structured event for output layer
+        results.append({
+            "event": "brute-force",
+            "source": ip,
+            "failed_logins": count_failures,
+            "severity": severity
+        })
+
+    return results

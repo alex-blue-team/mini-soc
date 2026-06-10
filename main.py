@@ -1,44 +1,50 @@
-# main.py Entry point for Mini SIEM v7
-#
-# This module controls execution flow of the system.
-# It coordinates:
-# - Log ingestion
-# - Streaming detection mode
-# - Final summary reporting mode
-# - Output formatting and alert generation
+"""
+Mini SIEM - Main Entry Point
 
-import sys
-import os
+This file controls the application workflow:
+- parses command-line arguments
+- selects operating mode
+- processes log data
+- generates alerts and summaries
+"""
+
 import json
 
+from cli import parse_arguments
 from parser import read_logs
-from config import STREAMING_MODE, FINAL_SUMMARY_MODE
-from correlator import process_event, process_events
+from correlator import process_event
+from correlator import process_events
 from reporter import create_summary
 from alert import create_alert
 
 
-
 def main():
 
-    # Validate CLI arguments
-    if len(sys.argv) < 2:
-        print("\nUsage: python3 main.py path_log_file\n")
+    # Parse and validate command-line arguments
+    parse_result = parse_arguments()
+
+    if parse_result is None:
         return
 
-    file_path = sys.argv[1]
+    file_path, mode = parse_result
 
-    # Ensure log file exists before processing
-    if not os.path.exists(file_path):
-        print("\nFile not found\n")
-        return
+    # Configure application mode
+    if mode == "--streaming":
+        STREAMING_MODE = True
+        FINAL_SUMMARY_MODE = False
 
-    # -------------------------------
-    # STREAMING MODE (real-time alerts)
-    # -------------------------------
+    elif mode == "--summary":
+        STREAMING_MODE = False
+        FINAL_SUMMARY_MODE = True
+
+    elif mode == "--both":
+        STREAMING_MODE = True
+        FINAL_SUMMARY_MODE = True
+
+    # Real-time event processing
     if STREAMING_MODE:
 
-        print("\n--- Streaming Mode: Real-time detection ---\n")
+        print("\n--- Potential threats in streaming mode ---\n")
 
         for line in read_logs(file_path):
 
@@ -47,20 +53,18 @@ def main():
             if result:
                 create_alert(json.dumps(result, indent=4))
 
-    # -------------------------------
-    # FINAL SUMMARY MODE (batch report)
-    # -------------------------------
+    # Full log analysis and final report
     if FINAL_SUMMARY_MODE:
 
-        print("\n--- Final Summary Mode: Aggregated report ---\n")
+        print("\n--- Final alert on potential threats ---\n")
 
         lines = read_logs(file_path)
 
         summary_failed_logins = process_events(lines)
 
-        results = create_summary(summary_failed_logins)
+        result_events = create_summary(summary_failed_logins)
 
-        for result in results:
+        for result in result_events:
             create_alert(json.dumps(result, indent=4))
 
 

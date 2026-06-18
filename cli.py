@@ -1,70 +1,67 @@
-"""
-Mini SIEM - Command Line Arguments
-
-This module validates user input received from the terminal:
-- checks the number of arguments
-- verifies file existence
-- validates operating mode
-- returns parsed arguments to the application
-"""
+# Handles command-line arguments:
+# - validates input parameters
+# - checks file existence
+# - verifies selected operating mode
 
 import sys
 import os
 
 
-AVAILABLE_MODES = ["--streaming", "--summary", "--both"]
+AVAILABLE_MODES = ("--streaming", "--summary", "--both")
 
 
-def prompt_input_arguments():
-    """Display usage information when arguments are missing."""
+def indicate_correct_input():
+    # Display usage information when arguments are missing.
+    print("\nError",
+        "\nSpecify the correct path and mode\n",
+        "\nAvailable modes:",
+        "\n --streaming",
+        "\n --summary",
+        "\n --both\n")
 
-    print(
-        "\nError",
-        "\nPlease specify correct path to the file and operating mode\n",
+
+def suggest_correct_mode(mode):
+    # Display available modes when an invalid mode is specified.
+    print("\nError",
+        f"\nIncorrect mode specified: {mode.upper()}\n",
         "\nAvailable modes:",
         "\n --streaming",
         "\n --summary",
         "\n --both\n"
-    )
+        )
 
 
-def show_operating_modes(mode):
-    """Display available modes when an invalid mode is specified."""
+def validate_cli_arguments():
+    # Validate command-line arguments before program execution.
 
-    print(
-        "\nError",
-        f"\n Incorrect mode specified: {mode.upper()}\n",
-        "\nAvailable modes:",
-        "\n --streaming",
-        "\n --summary",
-        "\n --both\n"
-    )
-
-
-def parse_arguments():
-
-    # Validate number of arguments
     if len(sys.argv) < 3:
-        prompt_input_arguments()
+        indicate_correct_input()
         return None
 
-    if len(sys.argv) > 3:
-        print("\nToo many arguments\n")
-        print("\nSee specification\n")
+    file_path = get_file_path()
+
+    if not os.path.exists(file_path):
+        print("\nError",
+            f"\nA non-existent path was specified: {file_path}\n")
         return None
 
-    file_path = sys.argv[1]
     mode = sys.argv[2]
 
-    # Verify that the log file exists
-    if not os.path.exists(file_path):
-        print(f"\nFile not found: {file_path}\n")
-        print("\nSee specification\n")
+    if len(sys.argv) > 3:
+        print("\nToo many arguments\n",
+            "\nSee specification\n")
         return None
 
-    # Validate selected operating mode
     if mode not in AVAILABLE_MODES:
-        show_operating_modes(mode)
+        suggest_correct_mode(mode)
         return None
 
-    return file_path, mode
+    return mode
+
+
+def get_file_path():
+    # Return the log file path provided by the user.
+
+    file_path = sys.argv[1]
+
+    return file_path

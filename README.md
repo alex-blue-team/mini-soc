@@ -1,8 +1,8 @@
-# Mini SIEM v8
+# Mini SIEM v8.1
 
 A lightweight Python-based SIEM-inspired log analysis tool designed for learning cybersecurity, log correlation, and event detection concepts.
 
-This version significantly improves command-line control, modular execution modes, and user input validation, making the tool fully CLI-driven.
+This version focuses on internal refactoring, cleaner architecture, improved maintainability, and better separation of responsibilities while preserving all existing functionality.
 
 ---
 
@@ -12,12 +12,16 @@ This project simulates a simplified Security Information and Event Management (S
 
 The system processes log files, detects brute-force login activity, correlates events by source IP address, and generates alerts based on predefined severity thresholds.
 
-### Key Improvements in v8
+### Key Improvements in v8.1
 
-- Full CLI-based execution
-- Runtime mode selection through terminal arguments
-- Input validation and user-friendly error handling
-- Removal of configuration-based mode selection
+- Refactored execution flow into a dedicated `runner.py` module
+- Simplified `main.py` into a lightweight application entry point
+- Improved separation of responsibilities between modules
+- Introduced configurable severity threshold constants
+- Replaced list-based mode storage with immutable tuple constants
+- Simplified event counting using dictionary `.get()` method
+- Reduced code duplication and improved code readability
+- Improved maintainability and project structure
 
 ---
 
@@ -31,6 +35,8 @@ The system processes log files, detects brute-force login activity, correlates e
 - Detection of invalid file paths and arguments
 - Modular architecture
 - Generator-based log processing
+- Dedicated execution orchestration layer (`runner.py`)
+- Configurable severity thresholds
 
 ---
 
@@ -99,29 +105,74 @@ Runs streaming and summary analysis together.
 ### Streaming Mode
 
 ```text
-Log File → CLI Parser → Event Processor → Alert System
+Log File
+    ↓
+CLI
+    ↓
+Runner
+    ↓
+Event Processor
+    ↓
+Alert System
 ```
 
 ### Summary Mode
 
 ```text
-Log File → CLI Parser → Correlator → Reporter → Alert System
+Log File
+    ↓
+CLI
+    ↓
+Runner
+    ↓
+Correlator
+    ↓
+Reporter
+    ↓
+Alert System
 ```
 
 ### Combined Mode
 
 ```text
-Log File → CLI Parser → Streaming Analysis + Summary Analysis → Alerts
+Log File
+    ↓
+CLI
+    ↓
+Runner
+    ↓
+Streaming Analysis + Summary Analysis
+    ↓
+Alerts
 ```
+
+---
+
+## Version 8.1 Changes
+
+This release focuses on code quality, maintainability, and internal refactoring.
+
+### Improvements
+
+- Refactored execution flow into a dedicated `runner.py` module
+- Simplified `main.py` to a lightweight application entry point
+- Improved separation of responsibilities between modules
+- Replaced list-based mode storage with immutable tuple constants
+- Introduced named severity threshold constants
+- Simplified event counting using dictionary `.get()` method
+- Reduced code duplication
+- Improved readability and maintainability
+- Preserved existing functionality while improving architecture
 
 ---
 
 ## Project Structure
 
 ```text
-mini-siem-v8/
+mini-siem-v8.1/
 
 ├── main.py
+├── runner.py
 ├── cli.py
 ├── parser.py
 ├── correlator.py
@@ -160,10 +211,24 @@ python3 main.py test_04.log --both
 {
     "event": "brute-force",
     "source": "185.234.217.45",
-    "failed_logins": 23,
+    "failed login": 23,
     "severity": "High"
 }
 ```
+
+---
+
+## Detection Logic
+
+The system currently detects brute-force login activity using configurable severity thresholds.
+
+```python
+CRITICAL_THRESHOLD = 100
+HIGH_THRESHOLD = 20
+MEDIUM_THRESHOLD = 5
+```
+
+Severity is assigned automatically based on the number of failed login attempts detected from a single source IP address.
 
 ---
 
@@ -187,17 +252,25 @@ This project was built to practice:
 - Modular software design
 - CLI application development
 - Input validation and error handling
+- Refactoring techniques
+- Software architecture fundamentals
 
 ---
 
-## Future Improvements (v8.1)
+## Future Improvements (v8.2)
 
-Planned improvements for the next version:
+The next release will focus on object-oriented design and further refactoring.
 
-- Refactor `main.py` into a cleaner orchestration layer
-- Improve separation of execution logic
-- Simplify mode management
-- Prepare the project for time-window based detection
+Planned improvements:
+
+- Replace global variables with dedicated classes
+- Encapsulate correlation state inside objects
+- Continue improving separation of responsibilities
+- Refactor internal application structure
+- Improve maintainability and scalability
+- Prepare the codebase for additional detection rules
+- Lay the foundation for future time-window based detection
+- Apply object-oriented programming principles to the SIEM workflow
 
 ---
 
@@ -206,3 +279,5 @@ Planned improvements for the next version:
 An aspiring cybersecurity professional passionate about computer science, security engineering, and continuous learning.
 
 Currently building hands-on projects in Python and cybersecurity while working toward a professional career in Spain.
+
+This project is part of a long-term learning journey focused on SOC operations, detection engineering, SIEM concepts, and security automation.

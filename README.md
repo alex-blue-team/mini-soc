@@ -1,8 +1,8 @@
-# Mini SIEM v8.1
+# Mini SIEM v8.2
 
-A lightweight Python-based SIEM-inspired log analysis tool designed for learning cybersecurity, log correlation, and event detection concepts.
+A lightweight Python-based SIEM-inspired log analysis tool designed for learning cybersecurity, log correlation, detection engineering, and event-driven architecture concepts.
 
-This version focuses on internal refactoring, cleaner architecture, improved maintainability, and better separation of responsibilities while preserving all existing functionality.
+This version evolves v8.1 into a more structured object-oriented architecture with improved separation of responsibilities and a dedicated detection engine.
 
 ---
 
@@ -12,16 +12,21 @@ This project simulates a simplified Security Information and Event Management (S
 
 The system processes log files, detects brute-force login activity, correlates events by source IP address, and generates alerts based on predefined severity thresholds.
 
-### Key Improvements in v8.1
+In v8.2, the system is refactored into a fully modular pipeline with a clear execution controller and dedicated correlation engine.
 
-- Refactored execution flow into a dedicated `runner.py` module
-- Simplified `main.py` into a lightweight application entry point
-- Improved separation of responsibilities between modules
-- Introduced configurable severity threshold constants
-- Replaced list-based mode storage with immutable tuple constants
-- Simplified event counting using dictionary `.get()` method
-- Reduced code duplication and improved code readability
-- Improved maintainability and project structure
+---
+
+## Key Improvements in v8.2
+
+- Introduced object-oriented correlation engine (`correlator.py`)
+- Separated execution logic into `runner.py`
+- Clear CLI isolation in `cli.py`
+- Centralized configuration in `config.py`
+- Improved parser isolation for log ingestion
+- Dedicated alert system module
+- Cleaner reporting layer (`reporter.py`)
+- Better scalability for future detection rules
+- Foundation prepared for time-window and advanced correlation logic
 
 ---
 
@@ -31,12 +36,13 @@ The system processes log files, detects brute-force login activity, correlates e
 - Final summary reporting (batch analysis)
 - Combined dual-mode execution
 - Full CLI-based control
-- User input validation and error handling
+- Input validation and error handling
 - Detection of invalid file paths and arguments
-- Modular architecture
+- Modular architecture (OOP-based core engine)
 - Generator-based log processing
-- Dedicated execution orchestration layer (`runner.py`)
+- Dedicated execution orchestration layer
 - Configurable severity thresholds
+- Extensible correlation engine
 
 ---
 
@@ -67,40 +73,31 @@ The system includes robust validation of user input:
 
 ---
 
-## Operating Modes
+## Architecture (v8.2)
 
-### 1. Streaming Mode
+```
+mini-siem-v8.2/
 
-Processes log entries one by one and generates alerts in real time.
-
-**Benefits:**
-
-- Immediate detection
-- Simulates live SIEM monitoring
-- Fast response to threats
-
-### 2. Summary Mode
-
-Processes the full log file and generates a final aggregated report.
-
-**Benefits:**
-
-- Complete overview of system activity
-- Useful for forensic analysis
-- Aggregated detection results
-
-### 3. Both Mode
-
-Runs streaming and summary analysis together.
-
-**Benefits:**
-
-- Combines real-time and batch analysis
-- More complete security visibility
+├── main.py                 # Entry point
+├── cli.py                  # CLI argument parsing
+├── runner.py              # Execution controller (modes)
+├── correlator.py          # Brute-force detection engine (OOP)
+├── reporter.py            # Summary generation
+├── parser.py              # Log file reader
+├── alert.py               # Alert output system
+├── config.py              # Central configuration
+│
+├── test_log/              # Sample log datasets
+├── legacy/                # Previous implementations (archived)
+│
+├── V8_SPEC.md             # Technical specification
+├── README.md              # Documentation
+└── .gitignore             # Ignored files configuration
+```
 
 ---
 
-## Architecture
+## Core Execution Flow
 
 ### Streaming Mode
 
@@ -111,9 +108,9 @@ CLI
     ↓
 Runner
     ↓
-Event Processor
+Parser
     ↓
-Alert System
+Alert Engine
 ```
 
 ### Summary Mode
@@ -125,7 +122,9 @@ CLI
     ↓
 Runner
     ↓
-Correlator
+Parser
+    ↓
+Correlator (OOP Engine)
     ↓
 Reporter
     ↓
@@ -141,67 +140,53 @@ CLI
     ↓
 Runner
     ↓
-Streaming Analysis + Summary Analysis
+Streaming Pipeline + Correlation Engine
     ↓
-Alerts
+Alerts + Report
 ```
 
 ---
 
-## Version 8.1 Changes
+## Core Modules
 
-This release focuses on code quality, maintainability, and internal refactoring.
+### main.py
+Entry point of the system. Initializes CLI and launches execution pipeline.
 
-### Improvements
+### cli.py
+Parses command-line arguments and validates runtime options.
 
-- Refactored execution flow into a dedicated `runner.py` module
-- Simplified `main.py` to a lightweight application entry point
-- Improved separation of responsibilities between modules
-- Replaced list-based mode storage with immutable tuple constants
-- Introduced named severity threshold constants
-- Simplified event counting using dictionary `.get()` method
-- Reduced code duplication
-- Improved readability and maintainability
-- Preserved existing functionality while improving architecture
+### runner.py
+Controls execution modes (streaming, summary, both) and orchestrates system flow.
 
----
+### parser.py
+Reads and normalizes raw log files into structured events.
 
-## Project Structure
+### correlator.py
+Object-oriented brute-force detection engine.
+Implements correlation logic across events grouped by source IP.
 
-```text
-mini-siem-v8.1/
+### alert.py
+Handles alert generation and formatting.
 
-├── main.py
-├── runner.py
-├── cli.py
-├── parser.py
-├── correlator.py
-├── reporter.py
-├── alert.py
-└── legacy/
-```
+### reporter.py
+Generates aggregated summary reports based on correlated events.
+
+### config.py
+Central configuration for thresholds, rules, and system parameters.
 
 ---
 
-## Example Usage
+## Detection Logic
 
-### Streaming Mode
+The system detects brute-force login activity using configurable thresholds:
 
-```bash
-python3 main.py test_04.log --streaming
+```python
+CRITICAL_THRESHOLD = 100
+HIGH_THRESHOLD = 20
+MEDIUM_THRESHOLD = 5
 ```
 
-### Summary Mode
-
-```bash
-python3 main.py test_04.log --summary
-```
-
-### Combined Mode
-
-```bash
-python3 main.py test_04.log --both
-```
+Severity is assigned based on the number of failed login attempts per source IP.
 
 ---
 
@@ -218,25 +203,42 @@ python3 main.py test_04.log --both
 
 ---
 
-## Detection Logic
+## Operating Modes
 
-The system currently detects brute-force login activity using configurable severity thresholds.
+### 1. Streaming Mode
 
-```python
-CRITICAL_THRESHOLD = 100
-HIGH_THRESHOLD = 20
-MEDIUM_THRESHOLD = 5
-```
+Processes log entries one by one and generates alerts in real time.
 
-Severity is assigned automatically based on the number of failed login attempts detected from a single source IP address.
+### 2. Summary Mode
+
+Processes full log file and generates aggregated detection report.
+
+### 3. Both Mode
+
+Combines streaming + summary analysis for full visibility.
 
 ---
 
-## Demo Video
+## Test Data
 
-Project demonstration:
+Directory `test_log/` contains sample datasets for testing detection logic and validating system behavior.
 
-https://youtu.be/Mip7U6Uhl3I?si=aGYiWxGjQ1goMhaZ
+---
+
+## Legacy Code
+
+Directory `legacy/` stores previous implementations for reference and backward compatibility.
+
+---
+
+## Version 8.2 Changes (Summary)
+
+- Introduced OOP-based correlation engine
+- Separated execution controller (`runner.py`)
+- Improved modular pipeline design
+- Strengthened separation of concerns
+- Prepared architecture for advanced detection features
+- Improved scalability for future SIEM extensions
 
 ---
 
@@ -248,36 +250,29 @@ This project was built to practice:
 - Event correlation
 - Detection engineering concepts
 - SIEM-style workflows
-- Python programming
-- Modular software design
+- Object-oriented design
+- Modular Python architecture
 - CLI application development
 - Input validation and error handling
-- Refactoring techniques
-- Software architecture fundamentals
+- Software refactoring
+- Security monitoring fundamentals
 
 ---
 
-## Future Improvements (v8.2)
-
-The next release will focus on object-oriented design and further refactoring.
+## Future Improvements (v8.3 direction)
 
 Planned improvements:
 
-- Replace global variables with dedicated classes
-- Encapsulate correlation state inside objects
-- Continue improving separation of responsibilities
-- Refactor internal application structure
-- Improve maintainability and scalability
-- Prepare the codebase for additional detection rules
-- Lay the foundation for future time-window based detection
-- Apply object-oriented programming principles to the SIEM workflow
+- Time-window based correlation engine
+- Rule-based detection system expansion
+- Advanced alert scoring model
+- Performance optimization for large logs
+- Plugin-based detection architecture
 
 ---
 
 ## Author
 
-An aspiring cybersecurity professional passionate about computer science, security engineering, and continuous learning.
+An aspiring cybersecurity engineer focused on SOC operations, detection engineering, and security automation.
 
-Currently building hands-on projects in Python and cybersecurity while working toward a professional career in Spain.
-
-This project is part of a long-term learning journey focused on SOC operations, detection engineering, SIEM concepts, and security automation.
+Currently building structured SIEM-like systems in Python as part of a long-term learning path toward professional cybersecurity roles in Europe.

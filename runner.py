@@ -1,43 +1,47 @@
-# Coordinates log processing workflows.
-# Runs streaming analysis and summary analysis modes.
+"""
+runner.py
+
+Controls execution flow of the mini-SIEM system.
+Starts streaming or summary processing modes.
+"""
 
 import json
 
-from cli import get_file_path
+from correlator import BruteForceDetector
+from cli import take_file_path
 from parser import read_logs
-from correlator import process_event
-from correlator import process_events
 from reporter import create_summary
 from alert import create_alert
 
 
 def start_streaming_mode():
-	# Process log events one by one and generate alerts immediately.
+    """Real-time processing of log lines."""
 
-	print("\n--- Streaming verification result ---\n")
-	file_path = get_file_path()
+    print("\n--- Streaming mode check result ---\n")
 
-	for line in read_logs(file_path):
+    file_path = take_file_path()
+    detector = BruteForceDetector()
 
-		result = process_event(line)
+    for line in read_logs(file_path):
 
-		if result:
+        result = detector.process_event(line)
 
-			create_alert(json.dumps(result, indent=4))
+        if result:
+            create_alert(json.dumps(result, indent=4))
 
 
 def start_summary_mode():
-	# Analyze the entire log file and generate a final summary.
+    """Batch processing of log file."""
 
-	print("\n--- Final check result ---\n")
+    print("\n--- Check result in final mode ---\n")
 
-	file_path = get_file_path()
-	lines = read_logs(file_path)
+    file_path = take_file_path()
+    lines = read_logs(file_path)
 
-	summary_failed_logins = process_events(lines)
+    detector = BruteForceDetector()
 
-	results = create_summary(summary_failed_logins)
+    failed_logins = detector.process_events(lines)
+    results = create_summary(failed_logins)
 
-	for result in results:
-
-		create_alert(json.dumps(result, indent=4))
+    for result in results:
+        create_alert(json.dumps(result, indent=4))

@@ -1,67 +1,76 @@
-# Handles command-line arguments:
-# - validates input parameters
-# - checks file existence
-# - verifies selected operating mode
+"""
+cli.py
+
+Handles command-line arguments for the mini-SIEM system.
+
+Validates:
+- input file path
+- selected operating mode
+"""
 
 import sys
 import os
 
-
-AVAILABLE_MODES = ("--streaming", "--summary", "--both")
-
-
-def indicate_correct_input():
-    # Display usage information when arguments are missing.
-    print("\nError",
-        "\nSpecify the correct path and mode\n",
-        "\nAvailable modes:",
-        "\n --streaming",
-        "\n --summary",
-        "\n --both\n")
+import config
 
 
-def suggest_correct_mode(mode):
-    # Display available modes when an invalid mode is specified.
-    print("\nError",
-        f"\nIncorrect mode specified: {mode.upper()}\n",
-        "\nAvailable modes:",
-        "\n --streaming",
-        "\n --summary",
-        "\n --both\n"
-        )
+def take_file_path():
+    """Get file path from command-line arguments."""
+
+    # First CLI argument is the file path
+    file_path = sys.argv[1]
+    return file_path
 
 
-def validate_cli_arguments():
-    # Validate command-line arguments before program execution.
+def check_path_and_mode():
+    """Validate CLI arguments and return selected mode."""
 
+    # We expect: script.py <file_path> <mode>
     if len(sys.argv) < 3:
-        indicate_correct_input()
+        _suggest_input_method()
         return None
 
-    file_path = get_file_path()
+    file_path = take_file_path()
 
+    # Check that file exists before processing
     if not os.path.exists(file_path):
         print("\nError",
-            f"\nA non-existent path was specified: {file_path}\n")
+              f"\nInvalid path specified: {file_path}\n")
+        return None
+
+    # Ensure no extra arguments were passed
+    if len(sys.argv) > 3:
+        print("\nToo many arguments specified\n",
+              "\nSee the specification\n")
         return None
 
     mode = sys.argv[2]
 
-    if len(sys.argv) > 3:
-        print("\nToo many arguments\n",
-            "\nSee specification\n")
-        return None
-
-    if mode not in AVAILABLE_MODES:
-        suggest_correct_mode(mode)
+    # Validate selected mode against config
+    if mode not in config.AVAILABLE_MODES:
+        _suggest_input_mode(mode)
         return None
 
     return mode
 
 
-def get_file_path():
-    # Return the log file path provided by the user.
+def _suggest_input_method():
+    """Show correct usage of the CLI."""
 
-    file_path = sys.argv[1]
+    print("\nError",
+          "\nSpecify the file path and operating mode.\n",
+          "\nAvailable modes:",
+          "\n  --streaming",
+          "\n  --summary",
+          "\n  --both\n")
 
-    return file_path
+
+def _suggest_input_mode(mode):
+    """Show error and list valid modes."""
+
+    print("\nError",
+          f"\nInvalid mode specified {mode.upper()}\n",
+          "\nAvailable modes:",
+          "\n  --streaming",
+          "\n  --summary",
+          "\n  --both\n")

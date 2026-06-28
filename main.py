@@ -1,32 +1,35 @@
-# Entry point of the mini-SIEM.
-# Validates user input and starts the selected processing mode.
+"""
+main.py
 
-from cli import validate_cli_arguments
+Application entry point.
+
+Validates command-line arguments and starts
+the selected operating mode.
+"""
+
+from cli import check_path_and_mode
 from runner import start_streaming_mode
 from runner import start_summary_mode
 
 
 def main():
 
-	# Validate command-line arguments.
-	result = validate_cli_arguments()
+    mode = check_path_and_mode()
 
-	if result is None:
-		return
+    if mode is None:
+        return
 
-	mode = result
+    streaming_mode = mode in ("--streaming", "--both")
+    summary_mode = mode in ("--summary", "--both")
 
-	# Determine which operating modes should be executed.
-	is_streaming_enabled = mode in ("--streaming", "--both")
-	is_summary_enabled = mode in ("--summary", "--both")
+    # Run real-time analysis mode.
+    if streaming_mode:
+        start_streaming_mode()
 
-	if is_streaming_enabled:
-		start_streaming_mode()
-
-	if is_summary_enabled:
-		start_summary_mode()
+    # Run summary analysis mode.
+    if summary_mode:
+        start_summary_mode()
 
 
 if __name__ == "__main__":
-	# Start the application.
-	main()
+    main()

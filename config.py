@@ -1,16 +1,21 @@
-"""
-config.py
+AVAILABLE_MODES = [
+    "--streaming",
+    "--summary",
+    "--both"
+]
 
-Central configuration file for the mini-SIEM system.
+STREAMING_MODES = [
+    "--streaming",
+    "--both"
+]
 
-Contains:
-- supported CLI modes
-- brute-force detection thresholds
-"""
+SUMMARY_MODES = [
+    "--summary",
+    "--both"
+]
 
-AVAILABLE_MODES = ("--streaming", "--summary", "--both")
+TIME_WINDOW_SECONDS = 60
 
-# Brute-force detection thresholds (number of failed logins)
-CRITICAL_THRESHOLD = 100
-HIGH_THRESHOLD = 20
-MEDIUM_THRESHOLD = 5
+MEDIUM_THRESHOLD = 4
+HIGH_THRESHOLD = 6
+CRITICAL_THRESHOLD = 9

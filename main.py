@@ -1,11 +1,4 @@
-"""
-main.py
-
-Application entry point.
-
-Validates command-line arguments and starts
-the selected operating mode.
-"""
+import config
 
 from cli import check_path_and_mode
 from runner import start_streaming_mode
@@ -16,18 +9,10 @@ def main():
 
     mode = check_path_and_mode()
 
-    if mode is None:
-        return
-
-    streaming_mode = mode in ("--streaming", "--both")
-    summary_mode = mode in ("--summary", "--both")
-
-    # Run real-time analysis mode.
-    if streaming_mode:
+    if mode in config.STREAMING_MODES:
         start_streaming_mode()
 
-    # Run summary analysis mode.
-    if summary_mode:
+    if mode in config.SUMMARY_MODES:
         start_summary_mode()
 
 
